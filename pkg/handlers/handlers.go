@@ -1,6 +1,7 @@
-package main
+package handlers
 
 import (
+	"github.com/stellyes/go-web-routes/pkg/render"
 	"net/http"
 )
 
@@ -11,9 +12,9 @@ import (
 // Uppercase function names make them public
 // to other packages beyond this one
 func Home(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home.page.tmpl")
+	render.RenderTemplate(w, "home.page.tmpl")
 }
 
 func About(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "about.page.tmpl")
+	render.RenderTemplate(w, "about.page.tmpl")
 }
