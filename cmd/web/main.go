@@ -16,6 +16,7 @@ const portNumber = ":4000"
 func main() {
 	var app config.AppConfig
 
+	// Templates are HTML fragments, so to speak
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("Cannot create template cache")
@@ -23,13 +24,18 @@ func main() {
 
 	app.TemplateCache = tc
 
-	render.NewTemplates(&app)
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
 
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+	render.NewTemplates(&app)
 
 	_, _ = fmt.Println(fmt.Sprintf("Starting applicatiton on port %s", portNumber))
 
-	// Start web server (port, and handler)
-	_ = http.ListenAndServe(portNumber, nil)
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+
+	err = srv.ListenAndServe()
+	log.Fatal(err)
 }

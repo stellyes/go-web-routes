@@ -2,11 +2,13 @@ package render
 
 import (
 	"bytes"
-	"github.com/stellyes/go-web-routes/pkg/config"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/stellyes/go-web-routes/pkg/config"
+	"github.com/stellyes/go-web-routes/pkg/models"
 )
 
 var app *config.AppConfig
@@ -16,9 +18,20 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	// get the template cache from app config
-	tc := app.TemplateCache
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	// Fill data here when it becomes of use
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+	var tc map[string]*template.Template
+
+	if app.UseCache {
+		// get template cache from app config
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	// get requested template from cache
 	t, ok := tc[tmpl]
@@ -27,7 +40,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 
 	buf := new(bytes.Buffer)
-	_ = t.Execute(buf, nil)
+	td = AddDefaultData(td)
+	_ = t.Execute(buf, td)
 
 	// render the template
 	_, err := buf.WriteTo(w)
