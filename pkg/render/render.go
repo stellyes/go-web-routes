@@ -2,39 +2,41 @@ package render
 
 import (
 	"bytes"
+	"github.com/stellyes/go-web-routes/pkg/config"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
+var app *config.AppConfig
+
+// NewTemplates sets the config for the template package
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	// create template cache
-	tc, err := createTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// get the template cache from app config
+	tc := app.TemplateCache
 
 	// get requested template from cache
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("Could not get tmpl from template cache")
 	}
 
 	buf := new(bytes.Buffer)
 	_ = t.Execute(buf, nil)
-	if err != nil {
-		log.Println(err)
-	}
 
 	// render the template
-	_, err = buf.WriteTo(w)
+	_, err := buf.WriteTo(w)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{} // Map of strings pointing to templates
 
 	// get all files with name *.page.tmpl from ./templates
