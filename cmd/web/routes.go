@@ -17,6 +17,7 @@ func routes(app *config.AppConfig) http.Handler {
 
 	// Homemade middleware from middleware.go!
 	mux.Use(NoSurf)
+	mux.Use(SessionLoad)
 
 	// Create http routes
 	mux.Get("/", handlers.Repo.Home)

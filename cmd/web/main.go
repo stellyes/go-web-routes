@@ -2,19 +2,37 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/alexedwards/scs/v2"
 	"github.com/stellyes/go-web-routes/pkg/config"
 	"github.com/stellyes/go-web-routes/pkg/handlers"
 	"github.com/stellyes/go-web-routes/pkg/render"
-	"log"
-	"net/http"
 )
 
 const portNumber = ":4000"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
 // Lowercase function names make them private
 // to this specific module
 func main() {
-	var app config.AppConfig
+	// !!! CHANGE THIS TO TRUE WHEN IN PRODUCTION !!!
+	app.InProduction = false
+
+	// Create new user session
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour // 24 hour expire time
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	// In production, this encrypts cookie (https)
+	session.Cookie.Secure = app.InProduction
+
+	// Set configuration session to current user session
+	app.Session = session
 
 	// Templates are HTML fragments, so to speak
 	tc, err := render.CreateTemplateCache()

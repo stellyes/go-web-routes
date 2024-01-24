@@ -15,15 +15,22 @@ func WriteToConsole(next http.Handler) http.Handler {
 	})
 }
 
+// Adds cross-site request forgery protection for all POST requests
 func NoSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,
-		Path:     "/",   // Referencing the "entire" site
-		Secure:   false, // For HTTPS, which I'm not using rn
+		Path:     "/",              // Referencing the "entire" site
+		Secure:   app.InProduction, // For HTTPS, which I'm not using rn
 		SameSite: http.SameSiteLaxMode,
 	})
 
 	return csrfHandler
+}
+
+// SessionLoad loads and saves session on every request
+func SessionLoad(next http.Handler) http.Handler {
+	// CMD + Click on Load and Save to see the logic
+	return session.LoadAndSave(next)
 }

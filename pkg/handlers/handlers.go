@@ -33,6 +33,13 @@ func NewHandlers(r *Repository) {
 // Uppercase function names make them public
 // to other packages beyond this one
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	// Grab remote IP address and store
+	remoteIP := r.RemoteAddr
+
+	// func reciever, first time homepage is hit,
+	// remote IP stored in App Session data
+	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
+
 	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 
@@ -42,6 +49,9 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	// perform some logic
 	stringMap := make(map[string]string)
 	stringMap["test"] = "This feature is very similar to handlebars."
+
+	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
+	stringMap["remote_ip"] = remoteIP
 
 	// Send data to template
 	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
